@@ -32,7 +32,7 @@ after_initialize do
 
   class ::UserSummary
     def days_visited_recently(time_period)
-      @user.user_visits.where("visited_at > ? and posts_read > 0", time_period.days.ago).count
+      @user.user_visits.where("visited_at > ?", time_period.days.ago).count
     end
     
     def continous_days_visited
