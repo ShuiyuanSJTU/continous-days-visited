@@ -1,3 +1,8 @@
 en:
   js:
     continous_days_visited:
+      other: "continous days visited"
+    composer:
+      spoiler_ui_button_title_a: "Base64 encode"
+      spoiler_ui_button_title_b: "Base64 decode"
+      spoiler_ui_default_text: "Base64"
