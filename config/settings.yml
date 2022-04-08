@@ -1,4 +1,4 @@
 plugins:
   continous_days_visited_enabled:
     default: true
-    client: true
+    client: false

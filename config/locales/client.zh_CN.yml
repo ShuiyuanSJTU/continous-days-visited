@@ -2,8 +2,3 @@ zh_CN:
   js:
     continous_days_visited:
       other: "连续访问天数"
-
-    composer:
-      spoiler_ui_button_title_a: "Base64编码"
-      spoiler_ui_button_title_b: "Base64解码"
-      spoiler_ui_default_text: "Base64"
