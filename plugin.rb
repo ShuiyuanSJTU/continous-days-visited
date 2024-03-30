@@ -8,10 +8,21 @@
 
 enabled_site_setting :continous_days_visited_enabled
 
+require_relative 'app/lib/continous_days_visited'
+
 PLUGIN_NAME ||= 'ContinousDaysVisited'
 
 after_initialize do
   # https://github.com/discourse/discourse/blob/master/lib/plugin/instance.rb
+  register_user_custom_field_type :continous_days_visited, :integer
+
+  module OverrideUser
+    def create_visit_record!
+      super
+      ContinousDaysVisited.increase_continous_days_visited(self)
+    end
+  end
+
   class ::UserSummarySerializer
     attribute :continous_days_visited
 
@@ -25,21 +36,8 @@ after_initialize do
   end
 
   class ::UserSummary
-    def days_visited_recently(time_period)
-      @user.user_visits.where("visited_at > ? and posts_read > 0", time_period.days.ago).count
-    end
-
     def continous_days_visited
-      l, r = 0, days_visited_recently(36500) + 1
-      while l + 1 != r do
-        mid = (l + r) >> 1
-        if days_visited_recently(mid) >= mid
-          l = mid
-        else
-          r = mid
-        end
-      end
-      l
+      ContinousDaysVisited.continous_days_visited(@user)
     end
   end
 end
