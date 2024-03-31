@@ -22,6 +22,7 @@ after_initialize do
       ContinousDaysVisited.increase_continous_days_visited(self)
     end
   end
+  ::User.prepend OverrideUser
 
   class ::UserSummarySerializer
     attribute :continous_days_visited

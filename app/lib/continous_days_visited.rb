@@ -5,25 +5,40 @@ class ContinousDaysVisited
 
     def days_visited_recently(time_period)
         @user.user_visits\
-            .where("visited_at > ? and posts_read > 0", time_period.days.ago.to_date).count
+            .where("visited_at > ?", time_period.days.ago.to_date).count
+    end
+
+    def days_visited_period(left, right)
+        # including left and right, [0, right-left+1]
+        @user.user_visits\
+            .where("visited_at >= ? AND visited_at <= ?", \
+            right.days.ago.to_date, left.days.ago.to_date).count
     end
 
     def visited_yesterday?
         @user.user_visits\
-            .find_by("visited_at = ? and posts_read > 0", 1.days.ago.to_date).present?
+            .find_by("visited_at = ?", 1.days.ago.to_date).present?
+    end
+
+    def visited_today?
+        @user.user_visits\
+            .find_by("visited_at = ?", Time.now.to_date).present?
     end
 
     def recompute_continous_days_visited
+        # we use binary search to find the maximum number of continous days visited (excluding today)
+        # our implementation is strange, because we do not want to get 0 immediately when user did not visit today
         l, r = 0, days_visited_recently(36500) + 1
         while l + 1 != r do
+            # mid always greater than l, since r > l + 1
             mid = (l + r) >> 1
-            if days_visited_recently(mid) >= mid
-            l = mid
+            if days_visited_period(1, mid) >= mid
+                l = mid
             else
-            r = mid
+                r = mid
             end
         end
-        l
+        visited_today? ? l + 1 : l
     end
 
     def save_continous_days_visited(value)
@@ -50,10 +65,15 @@ class ContinousDaysVisited
             return recompute_and_store
         else
             if stored_days_visited == 0
+                # quick return to reduce db query
                 return 0
-            elsif !visited_yesterday?
-                reset_continous_days_visited
-                return 0
+            elsif days_visited_recently(2) == 0
+                # When == 2, it means user visited yesterday and today, do nothing
+                # When == 1, then
+                #    1. user visited yesterday but not today, do not reset immediately, wait for tomorrow
+                #    2. user visited today but not yesterday, stored value already updated when user visited today, do not reset again
+                # When == 0, reset continous days visited
+                return reset_continous_days_visited
             else
                 return stored_days_visited
             end
@@ -66,6 +86,7 @@ class ContinousDaysVisited
             return recompute_and_store
         else
             if !visited_yesterday?
+                # the first day of continous days visited
                 return save_continous_days_visited(1)
             else
                 return save_continous_days_visited(stored_days_visited + 1)
