@@ -13,13 +13,13 @@ require_relative 'app/lib/continous_days_visited'
 PLUGIN_NAME ||= 'ContinousDaysVisited'
 
 after_initialize do
-  # https://github.com/discourse/discourse/blob/master/lib/plugin/instance.rb
-  register_user_custom_field_type :continous_days_visited, :integer
+  register_user_custom_field_type "continous_days_visited", :integer
 
   module OverrideUser
-    def create_visit_record!
-      super
+    def create_visit_record!(date, opts = {})
+      result = super(date, opts)
       ContinousDaysVisited.increase_continous_days_visited(self)
+      result
     end
   end
   ::User.prepend OverrideUser
