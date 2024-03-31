@@ -2,8 +2,8 @@
 
 # name: continous-days-visited
 # about: Count number of continous days visited
-# version: 0.1
-# authors: chenyxuan
+# version: 1.0
+# authors: chenyxuan, pangbo
 # url: https://github.com/ShuiyuanSJTU/continous-days-visited
 
 enabled_site_setting :continous_days_visited_enabled
@@ -61,7 +61,7 @@ after_initialize do
           continous_days_visited: ContinousDaysVisited.continous_days_visited(user) 
         }
       end
-      
+
       def destroy
         user = User.find_by(id: params[:user_id])
         if user.nil?
