@@ -53,6 +53,15 @@ class ContinousDaysVisited
 
     def clean_stored_continous_days_visited
         save_continous_days_visited(nil)
+        clean_user_summary_cache
+        nil
+    end
+
+    def clean_user_summary_cache
+        Discourse.cache.keys("user_summary:#{@user.id}:*").each do |key|
+            # do not use Discourse.cache.delete, as keys are already normalized
+            Discourse.cache.redis.del(key)
+        end
     end
 
     def reset_continous_days_visited
