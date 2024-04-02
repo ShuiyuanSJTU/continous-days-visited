@@ -1,0 +1,11 @@
+name: Discourse Plugin
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  ci:
+    uses: ./.github/workflows/.discourse-plugin.yml
+    with: 
+      linting: false
