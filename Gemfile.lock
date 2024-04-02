@@ -70,7 +70,7 @@ GEM
     unicode-display_width (2.5.0)
 
 PLATFORMS
-  x64-mingw-ucrt
+  ruby
 
 DEPENDENCIES
   rubocop-discourse
