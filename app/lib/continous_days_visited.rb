@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class ContinousDaysVisited
     def initialize(user)
         @user = user
@@ -71,20 +73,20 @@ class ContinousDaysVisited
     def continous_days_visited
         stored_days_visited = @user.custom_fields[:continous_days_visited]&.to_i
         if stored_days_visited.nil?
-            return recompute_and_store
+            recompute_and_store
         else
             if stored_days_visited == 0
                 # quick return to reduce db query
-                return 0
+                0
             elsif days_visited_recently(2) == 0
                 # When == 2, it means user visited yesterday and today, do nothing
                 # When == 1, then
                 #    1. user visited yesterday but not today, do not reset immediately, wait for tomorrow
                 #    2. user visited today but not yesterday, stored value already updated when user visited today, do not reset again
                 # When == 0, reset continous days visited
-                return reset_continous_days_visited
+                reset_continous_days_visited
             else
-                return stored_days_visited
+                stored_days_visited
             end
         end
     end
@@ -92,13 +94,13 @@ class ContinousDaysVisited
     def increase_continous_days_visited
         stored_days_visited = @user.custom_fields[:continous_days_visited]&.to_i
         if stored_days_visited.nil?
-            return recompute_and_store
+            recompute_and_store
         else
             if !visited_yesterday?
                 # the first day of continous days visited
-                return save_continous_days_visited(1)
+                save_continous_days_visited(1)
             else
-                return save_continous_days_visited(stored_days_visited + 1)
+                save_continous_days_visited(stored_days_visited + 1)
             end
         end
     end
