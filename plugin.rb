@@ -18,7 +18,11 @@ after_initialize do
   module OverrideUser
     def create_visit_record!(date, opts = {})
       result = super(date, opts)
-      ContinousDaysVisited.increase_continous_days_visited(self)
+      if date == Date.today
+        ContinousDaysVisited.increase_continous_days_visited(self)
+      else
+        ContinousDaysVisited.clean_stored_continous_days_visited(self)
+      end
       result
     end
   end
