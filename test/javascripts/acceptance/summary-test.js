@@ -1,15 +1,9 @@
-import { click, visit } from "@ember/test-helpers";
+import { visit } from "@ember/test-helpers";
 import { test } from "qunit";
-import userFixtures from "discourse/tests/fixtures/user-fixtures";
 import {
   acceptance,
   exists,
-  query,
 } from "discourse/tests/helpers/qunit-helpers";
-import { cloneJSON } from "discourse-common/lib/object";
-import I18n from "discourse-i18n";
-
-let deleteAndBlock = null;
 
 acceptance("User Profile - Summary", function (needs) {
   needs.pretender((server, helper) => {
