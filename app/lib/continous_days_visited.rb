@@ -28,18 +28,17 @@ class ContinousDaysVisited
     end
 
     def recompute_continous_days_visited
-        # we use binary search to find the maximum number of continous days visited (excluding today)
-        # our implementation is strange, because we do not want to get 0 immediately when user did not visit today
-        l, r = 0, days_visited_recently(36500) + 1
-        while l + 1 != r do
-            # mid always greater than l, since r > l + 1
-            mid = (l + r) >> 1
-            if days_visited_period(1, mid) >= mid
-                l = mid
-            else
-                r = mid
-            end
-        end
+        # we first get the number of days visited before today
+        # and then add 1 if user visited today
+        # because we do not want to get 0 immediately when user did not visit today
+        l = DB.query(<<~SQL, user_id: @user.id).first.count
+          WITH t AS (
+            SELECT visited_at + (RANK() OVER (ORDER BY visited_at DESC))::int as d 
+            FROM user_visits WHERE user_id = :user_id
+            AND visited_at <= current_date - 1
+          )
+          SELECT COUNT(*) FROM t WHERE d = current_date
+        SQL
         visited_today? ? l + 1 : l
     end
 
