@@ -2,12 +2,12 @@
 
 require "rails_helper"
 
-describe ContinousDaysVisited do
+describe ::DiscourseContinousDaysVisited::ContinousDaysVisited do
   describe "stored value" do
-    context "user -> custom_fields -> continous_days_visited" do
+    describe "user -> custom_fields -> continous_days_visited" do
       let(:user) { Fabricate(:user) }
-      let(:cdv) { ContinousDaysVisited.new user }
-      before(:example) { }
+      let(:cdv) { described_class.new user }
+      before(:example) {}
 
       it "should be nil at first" do
         expect(user.custom_fields[:continous_days_visited]).to be_nil

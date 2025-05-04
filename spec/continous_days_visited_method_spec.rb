@@ -2,18 +2,18 @@
 
 require "rails_helper"
 
-describe ContinousDaysVisited do
+describe ::DiscourseContinousDaysVisited::ContinousDaysVisited do
   describe "when invoked from UserSummary" do
     let(:user) { Fabricate(:user) }
-    let(:cdv) { ContinousDaysVisited.new user }
+    let(:cdv) { described_class.new user }
 
-    def create_visit_record( user, visit_array )
+    def create_visit_record(user, visit_array)
       visit_array.each do |visit|
         UserVisit.create(user_id: user.id, visited_at: visit.days.ago.to_date)
       end
     end
 
-    context "recompute" do
+    describe "recompute" do
       it "should recompute if custom field is nil" do
         cdv.expects(:recompute_continous_days_visited).once
         cdv.continous_days_visited
@@ -26,7 +26,8 @@ describe ContinousDaysVisited do
         cdv.continous_days_visited
       end
     end
-    context "can get correct value with no custom field" do
+
+    describe "can get correct value with no custom field" do
       it "should set custom field to 0 from nil if no vistit" do
         expect(user.custom_fields[:continous_days_visited]).to be_nil
         expect(cdv.continous_days_visited).to eq(0)
@@ -55,7 +56,8 @@ describe ContinousDaysVisited do
         expect(user.reload.custom_fields[:continous_days_visited]).to eq(345)
       end
     end
-    context "can get correct value with custom field" do
+
+    describe "can get correct value with custom field" do
       it "should set custom field to 0 if no visit yesterday" do
         user.custom_fields[:continous_days_visited] = 100
         user.save_custom_fields

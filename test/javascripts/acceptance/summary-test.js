@@ -1,9 +1,6 @@
 import { visit } from "@ember/test-helpers";
 import { test } from "qunit";
-import {
-  acceptance,
-  exists,
-} from "discourse/tests/helpers/qunit-helpers";
+import { acceptance, exists } from "discourse/tests/helpers/qunit-helpers";
 
 acceptance("User Profile - Summary", function (needs) {
   needs.pretender((server, helper) => {
@@ -53,6 +50,9 @@ acceptance("User Profile - Summary", function (needs) {
   test("Viewing Summary", async function (assert) {
     await visit("/u/eviltrout/summary");
 
-    assert.ok(exists(".user_summary_continous_days_visited"), "continous days visited");
+    assert.ok(
+      exists(".user_summary_continous_days_visited"),
+      "continous days visited"
+    );
   });
 });

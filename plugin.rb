@@ -2,90 +2,51 @@
 
 # name: continous-days-visited
 # about: Count number of continous days visited
-# version: 1.0
+# version: 1.1
 # authors: chenyxuan, pangbo
 # url: https://github.com/ShuiyuanSJTU/continous-days-visited
 
 enabled_site_setting :continous_days_visited_enabled
 
-require_relative 'app/lib/continous_days_visited'
-
 module ::DiscourseContinousDaysVisited
-  PLUGIN_NAME = 'ContinousDaysVisited'.freeze
+  PLUGIN_NAME = "continous-days-visited".freeze
 end
+
+Rails.autoloaders.main.push_dir(
+  File.join(__dir__, "lib"),
+  namespace: ::DiscourseContinousDaysVisited,
+)
+
+require_relative "lib/engine"
 
 after_initialize do
   register_user_custom_field_type "continous_days_visited", :integer
 
-  module ::DiscourseContinousDaysVisited::OverrideUser
-    def create_visit_record!(date, opts = {})
-      result = super(date, opts)
-      if date == Date.today
-        ContinousDaysVisited.increase_continous_days_visited(self)
-      else
-        ContinousDaysVisited.clean_stored_continous_days_visited(self)
-      end
-      result
-    end
-  end
-  ::User.prepend ::DiscourseContinousDaysVisited::OverrideUser
-
-  class ::UserSummarySerializer
-    attribute :continous_days_visited
-
-    def continous_days_visited
-      object.continous_days_visited
-    end
-
-    def include_continous_days_visited?
-      can_see_summary_stats
-    end
-  end
-
-  class ::UserSummary
-    def continous_days_visited
-      ContinousDaysVisited.continous_days_visited(@user)
-    end
-  end
-
   module ::DiscourseContinousDaysVisited
-    class Engine < ::Rails::Engine
-      engine_name PLUGIN_NAME
-      isolate_namespace ::DiscourseContinousDaysVisited
-    end
-    
-    class ContinousDaysVisitedController < ::ApplicationController
-      def index
-        user = User.find_by(id: params[:user_id])
-        if user.nil?
-          render json: { error: "User not found" }, status: :not_found
-          return
+    module OverrideUser
+      def create_visit_record!(date, opts = {})
+        result = super(date, opts)
+        if date == Date.today
+          ContinousDaysVisited.increase_continous_days_visited(self)
+        else
+          ContinousDaysVisited.clean_stored_continous_days_visited(self)
         end
-        render json: { 
-          user_id: user.id,
-          username: user.username,
-          continous_days_visited: ContinousDaysVisited.continous_days_visited(user) 
-        }
-      end
-
-      def destroy
-        user = User.find_by(id: params[:user_id])
-        if user.nil?
-          render json: { error: "User not found" }, status: :not_found
-          return
-        end
-        ContinousDaysVisited.clean_stored_continous_days_visited(user)
-        render json: { success: "Cleaned continous days visited" }
+        result
       end
     end
+    ::User.prepend OverrideUser
 
-    Discourse::Application.routes.append { mount Engine, at: "/continous_days_visited" }
-
-    Engine.routes.draw do
-      constraints AdminConstraint.new do
-        get "/:user_id" => "continous_days_visited#index"
-        delete "/:user_id" => "continous_days_visited#destroy"
+    module ::OverrideUserSummary
+      def continous_days_visited
+        ::DiscourseContinousDaysVisited::ContinousDaysVisited.continous_days_visited(@user)
       end
     end
+    ::UserSummary.prepend OverrideUserSummary
   end
+
+  add_to_serializer(
+    :user_summary,
+    :continous_days_visited,
+    include_condition: -> { can_see_summary_stats },
+  ) { object.continous_days_visited }
 end
